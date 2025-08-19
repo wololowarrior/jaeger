@@ -1,0 +1,87 @@
+service:
+  extensions: [jaeger_storage, jaeger_query]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [attributes, batch]
+      exporters: [jaeger_storage_exporter, spanmetrics]
+    metrics/spanmetrics:
+      receivers: [spanmetrics]
+      exporters: [prometheus]
+  telemetry:
+    resource:
+      service.name: jaeger
+    metrics:
+      level: detailed
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: 0.0.0.0
+                port: 8888
+    logs:
+      level: INFO
+
+extensions:
+  jaeger_query:
+    storage:
+      traces: some_storage
+      metrics: some_metrics_storage
+  jaeger_storage:
+    backends:
+      some_storage:
+        memory:
+          max_traces: 100000
+    metric_backends:
+      some_metrics_storage:
+        prometheus:
+          endpoint: http://prometheus:9090
+          normalize_calls: true
+          normalize_duration: true
+
+# The spanmetrics connector generates metrics from spans
+connectors:
+  spanmetrics:
+    dimensions:
+      - name: operation
+        default: unknown-operation
+      # Add tag dimensions for filtering
+      - name: tag1
+        default: ""
+      - name: tag2
+        default: ""
+    dimensions_cache_size: 1000
+    aggregation_temporality: "AGGREGATION_TEMPORALITY_CUMULATIVE"
+    metrics_flush_interval: 15s
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+        endpoint: "0.0.0.0:4318"
+
+processors:
+  # The attributes processor copies resource attributes to span attributes
+  # This is required for tag filtering in metrics
+  attributes:
+    actions:
+      # Example of fixed tag values for demonstration purposes
+      # In production, you should use dynamic values from resource attributes if supported
+      - key: tag1
+        action: insert
+        value: "value1"
+      - key: tag2
+        action: insert
+        value: "value2"
+      # If your collector version supports it, use this syntax instead:
+      # - key: tag1
+      #   action: insert
+      #   from_attribute: resource.tag1
+  batch:
+
+exporters:
+  jaeger_storage_exporter:
+    trace_storage: some_storage
+  prometheus:
+    endpoint: "0.0.0.0:8889"

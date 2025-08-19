@@ -130,6 +130,14 @@ The primary use case is for testing source code changes to the SPM feature local
 make build
 ```
 
+#### Note
+In case the local docker registry port `5000` is being used, `make build` might fail.
+Update the `DOCKER_REGISTRY_PORT` variable in [Makefile](./Makefile) to use a different port. 
+
+And in [Docker.mk](../../scripts/makefiles/Docker.mk)
+
+
+
 ## Bring up the dev environment
 
 ```bash

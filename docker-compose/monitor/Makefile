@@ -1,15 +1,16 @@
 # Copyright (c) 2024 The Jaeger Authors.
 # SPDX-License-Identifier: Apache-2.0
 
-BINARY ?= jaeger # Default value uses v2 binary
-
+# Default value uses v2 binary
+BINARY ?= jaeger
+DOCKER_REGISTRY_PORT ?= 5000
 .PHONY: build
 build: clean-jaeger
 	cd ../../ && make build-$(BINARY) GOOS=linux 
 	cd ../../ && make create-baseimg PLATFORMS=linux/$(shell go env GOARCH)
 	cd ../../ && docker buildx build --target release \
 		--tag jaegertracing/$(BINARY):dev \
-		--build-arg base_image=localhost:5000/baseimg_alpine:latest \
+		--build-arg base_image=localhost:$(DOCKER_REGISTRY_PORT)/baseimg_alpine:latest \
 		--build-arg debug_image=not-used \
 		--build-arg TARGETARCH=$(shell go env GOARCH) \
 		--load \

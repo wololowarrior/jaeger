@@ -142,8 +142,10 @@ func (m MetricsReader) GetLatencies(ctx context.Context, requestParams *metricst
 				filters = append(filters, p.spanKindFilter)
 			}
 
-			// Add tag filters
-			filters = append(filters, p.tagFilters...)
+			// Add tag filters if there are any
+			if len(p.tagFilters) > 0 {
+				filters = append(filters, p.tagFilters...)
+			}
 
 			filterStr := strings.Join(filters, ", ")
 
@@ -195,8 +197,10 @@ func (m MetricsReader) GetCallRates(ctx context.Context, requestParams *metricst
 				filters = append(filters, p.spanKindFilter)
 			}
 
-			// Add tag filters
-			filters = append(filters, p.tagFilters...)
+			// Add tag filters if there are any
+			if len(p.tagFilters) > 0 {
+				filters = append(filters, p.tagFilters...)
+			}
 
 			filterStr := strings.Join(filters, ", ")
 
@@ -245,9 +249,11 @@ func (m MetricsReader) GetErrorRates(ctx context.Context, requestParams *metrics
 				errorFilters = append(errorFilters, p.spanKindFilter)
 			}
 
-			// Add tag filters
-			baseFilters = append(baseFilters, p.tagFilters...)
-			errorFilters = append(errorFilters, p.tagFilters...)
+			// Add tag filters if there are any
+			if len(p.tagFilters) > 0 {
+				baseFilters = append(baseFilters, p.tagFilters...)
+				errorFilters = append(errorFilters, p.tagFilters...)
+			}
 
 			errorFilterStr := strings.Join(errorFilters, ", ")
 			baseFilterStr := strings.Join(baseFilters, ", ")
