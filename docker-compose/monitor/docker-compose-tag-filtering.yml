@@ -23,7 +23,7 @@ services:
     command: "-d 24h -s 500ms"
     environment:
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4318/v1/traces
-      - OTEL_RESOURCE_ATTRIBUTES=env=production
+      - OTEL_RESOURCE_ATTRIBUTES=env=production,region=us-east-1
     depends_on:
       - jaeger
 
@@ -34,7 +34,7 @@ services:
     command: "-d 24h -s 500ms"
     environment:
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4318/v1/traces
-      - OTEL_RESOURCE_ATTRIBUTES=env=staging
+      - OTEL_RESOURCE_ATTRIBUTES=env=staging,region=us-east-1
     depends_on:
       - jaeger
 
