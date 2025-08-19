@@ -46,9 +46,7 @@ connectors:
       - name: operation
         default: unknown-operation
       # Add tag dimensions for filtering
-      - name: tag1
-        default: ""
-      - name: tag2
+      - name: env
         default: ""
     dimensions_cache_size: 1000
     aggregation_temporality: "AGGREGATION_TEMPORALITY_CUMULATIVE"
@@ -66,18 +64,10 @@ processors:
   # This is required for tag filtering in metrics
   attributes:
     actions:
-      # Example of fixed tag values for demonstration purposes
-      # In production, you should use dynamic values from resource attributes if supported
-      - key: tag1
+      # Copy resource attributes to span attributes for metrics filtering
+      - key: env
         action: insert
-        value: "value1"
-      - key: tag2
-        action: insert
-        value: "value2"
-      # If your collector version supports it, use this syntax instead:
-      # - key: tag1
-      #   action: insert
-      #   from_attribute: resource.tag1
+        from_attribute: env
   batch:
 
 exporters:

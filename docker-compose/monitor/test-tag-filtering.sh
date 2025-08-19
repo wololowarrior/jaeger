@@ -8,10 +8,10 @@
 
 echo "Generating traces with tags for testing..."
 
-# Generate traces with tag1=value1
-echo "Generating traces with tag1=value1..."
+# Generate traces with env=staging
+echo "Generating traces with env=staging..."
 docker run --env OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="http://localhost:4318/v1/traces" \
-  --env OTEL_RESOURCE_ATTRIBUTES="tag1=value1" \
+  --env OTEL_RESOURCE_ATTRIBUTES="env=staging" \
   --network host \
   --rm \
   jaegertracing/jaeger-tracegen:latest \
@@ -20,25 +20,14 @@ docker run --env OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="http://localhost:4318/v1/tr
     -traces 10
 
 # Generate traces with tag2=value2
-echo "Generating traces with tag2=value2..."
+echo "Generating traces with env=production..."
 docker run --env OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="http://localhost:4318/v1/traces" \
-  --env OTEL_RESOURCE_ATTRIBUTES="tag2=value2" \
+  --env OTEL_RESOURCE_ATTRIBUTES="env=production" \
   --network host \
   --rm \
   jaegertracing/jaeger-tracegen:latest \
     -trace-exporter otlp-http \
-    -service tag-filtering-demo-2 \
-    -traces 10
-
-# Generate traces with both tags
-echo "Generating traces with both tag1=value1 and tag2=value2..."
-docker run --env OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="http://localhost:4318/v1/traces" \
-  --env OTEL_RESOURCE_ATTRIBUTES="tag1=value1,tag2=value2" \
-  --network host \
-  --rm \
-  jaegertracing/jaeger-tracegen:latest \
-    -trace-exporter otlp-http \
-    -service tag-filtering-demo-both \
+    -service tag-filtering-demo-1 \
     -traces 10
 
 echo "Done generating traces. Please wait a moment for metrics to be collected..."
@@ -49,8 +38,15 @@ CURRENT_TS=$(date +%s)000
 
 # Test tag filtering in metrics API
 echo -e "\n== Testing tag filtering in metrics API =="
-echo "Querying metrics with tag1=value1..."
-curl -s "http://localhost:16686/api/metrics/calls?service=tag-filtering-demo-1&service=tag-filtering-demo-both&groupByOperation=true&endTs=$CURRENT_TS&lookback=3600000&step=5000&ratePer=60000&tag=tag1:value1" | jq '.'
+
+echo -e "\nQuerying metrics with env=staging..."
+curl -s "http://localhost:16686/api/metrics/calls?service=tag-filtering-demo-1&groupByOperation=true&endTs=$CURRENT_TS&lookback=3600000&step=5000&ratePer=60000&tag=env:staging" | jq '.'
+
+echo -e "\nQuerying metrics with env=production..."
+curl -s "http://localhost:16686/api/metrics/calls?service=tag-filtering-demo-1&groupByOperation=true&endTs=$CURRENT_TS&lookback=3600000&step=5000&ratePer=60000&tag=env:production" | jq '.'
+
+echo -e "\nQuerying metrics with env=production..."
+curl -s "http://localhost:16686/api/metrics/calls?service=tag-filtering-demo-1&groupByOperation=true&endTs=$CURRENT_TS&lookback=3600000&step=5000&ratePer=60000&tag=env:produ" | jq '.'
 
 echo -e "\nDone testing tag filtering."
 echo "Visit http://localhost:16686/monitor to see metrics in the Jaeger UI."
