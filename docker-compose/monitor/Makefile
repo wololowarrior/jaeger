@@ -50,3 +50,9 @@ clean-all: clean-jaeger
 	docker rmi -f jaegertracing/all-in-one:latest ; \
 	docker rmi -f otel/opentelemetry-collector-contrib:latest ; \
 	docker rmi -f prom/prometheus:latest ; \
+
+.PHONY: metrics-tags-filtering
+metrics-tags-filtering: export JAEGER_VERSION = dev
+metrics-tags-filtering:
+	@echo "Running Jaeger with metrics tags filtering enabled..."
+	docker compose -f docker-compose-tag-filtering.yml up $(DOCKER_COMPOSE_ARGS)
